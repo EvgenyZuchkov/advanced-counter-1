@@ -1,51 +1,62 @@
 import './App.css'
-import {useEffect, useState} from "react";
+import {type ChangeEvent, useState} from "react";
 
 function App() {
-
-    const [value, setValue] = useState<number>(() => {
-        const stored = localStorage.getItem('counterValue')
-        return stored !== null ? JSON.parse(stored) : 0
-    })
-
-    useEffect(() => {
-        localStorage.setItem('counterValue', JSON.stringify(value))
-    }, [value])
+    const [value, setValue] = useState(0)
+    const [maxValue, setMaxValue] = useState(5)
+    const [draftMaxValue, setDraftMaxValue] = useState(5)
+    const [startValue, setStartValue] = useState(0)
 
     const incHandler = () => {
-        setValue(value + 1)
-    }
-
-    const setToLocalStorageHandler = () => {
-        localStorage.setItem('counterValue', JSON.stringify(value))
-        localStorage.setItem('counterValue + 1', JSON.stringify(value + 1))
-    }
-
-    const getToLocalStorageHandler = () => {
-        let newValue = localStorage.getItem('counterValue')
-        if (newValue) {
-            setValue(JSON.parse(newValue))
+        if (value < maxValue) {
+            setValue(value + 1)
+            localStorage.setItem('counterValue', JSON.stringify(value + 1))
         }
     }
 
-    const clearLocalStorageHandler = () => {
-        localStorage.clear()
+    const setHandler = () => {
+        setMaxValue(draftMaxValue)
+    }
+
+    const onChangeMaxValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        setDraftMaxValue(+e.currentTarget.value)
+    }
+
+    const onChangeStartValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        setStartValue(+e.currentTarget.value)
+        setValue(+e.currentTarget.value)
+    }
+
+    const resetHandler = () => {
         setValue(0)
     }
-
-    const removeFromLocalStorageHandler = () => {
-        localStorage.removeItem('counterValue + 1')
-    }
-
     return (
         <div className="App">
-            <h1>Local Storage</h1>
-            <h1>{value}</h1>
-            <button onClick={incHandler}>inc</button>
-            <button onClick={setToLocalStorageHandler}>setToLocalStorage</button>
-            <button onClick={getToLocalStorageHandler}>getToLocalStorage</button>
-            <button onClick={clearLocalStorageHandler}>clearLocalStorage</button>
-            <button onClick={removeFromLocalStorageHandler}>removeFromLocalStorage</button>
+            {/* Левая панель — настройки */}
+            <div className="panel settings">
+                <div className="row">
+                    <label>max value:</label>
+                    <input onChange={onChangeMaxValueHandler} type="number" value={draftMaxValue}/>
+                </div>
+                <div className="row">
+                    <label>start value:</label>
+                    <input type="number" value={startValue} onChange={onChangeStartValueHandler}/>
+                </div>
+                <div className="buttons">
+                    <button onClick={setHandler}>set</button>
+                </div>
+            </div>
+
+            {/* Правая панель — счётчик */}
+            <div className="panel counter">
+                <div className="display">
+                    <span className={value >= maxValue ? 'value max' : 'value'}>{value}</span>
+                </div>
+                <div className="buttons">
+                    <button onClick={incHandler} disabled={value >= maxValue}>inc</button>
+                    <button onClick={resetHandler}>reset</button>
+                </div>
+            </div>
         </div>
     )
 }
